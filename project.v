@@ -134,6 +134,15 @@ module ALU(out, error, inA, inB, mode, clear,clk);
                     str = inA ^ inB;
                     error = `NoError;
                 end
+            //TUDO: As of right now, these two shift the value of the last result, subject to change
+            `ShiftLeft:
+                begin
+                    str = {out[datalen-2:0], 1'b0};
+                end
+            `ShiftRight:
+                begin
+                    str = {1'b0, out[datalen-1:1]};
+                end
         endcase
     end
 endmodule
@@ -151,7 +160,7 @@ reg clk;
 //System reset
 reg reset;
 
-//Data inputs/Outputs
+//Data input registers /Outputs
 wire [datalen-1:0] out;
 wire [errorlen-1:0] err;
 reg [datalen-1:0] inA;
@@ -169,7 +178,7 @@ ModeToString #(datalen, modelen, errorlen) modestr(modeStr, errorStr, mode, err)
 
 //TUDO: No program lifetime
 initial begin
-    #37 $finish;    //Add 10 time units for every new test case
+    #57 $finish;    //Add 10 time units for every new test case
 end
 
 //Clock
@@ -198,5 +207,7 @@ initial begin
     #10 inA = 8'b01010001; inB = 8'b00011000; mode = `AND; clear = 0;
     #10 inA = out; mode = 4'b000; clear = 0;
     #10 inA = 8'b01010001; inB = 8'b00011000; mode = `OR; clear = 0;
+    #10 mode = `ShiftLeft;
+    #10 mode = `ShiftRight;
 end
 endmodule
