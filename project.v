@@ -107,14 +107,32 @@ module ALU(out, error, inA, inB, mode, clear,clk);
             `NoChange:
                 begin
                     str = out;
+                    error = `NoError;
                 end
             `Load:
                 begin
                     str = inA;
+                    error = `NoError;
                 end
             `NOT:
                 begin
                     str = ~inA;
+                    error = `NoError;
+                end
+            `AND:
+                begin
+                    str = inA & inB;
+                    error = `NoError;
+                end
+            `OR:
+                begin
+                    str = inA | inB;
+                    error = `NoError;
+                end
+            `XOR:
+                begin
+                    str = inA ^ inB;
+                    error = `NoError;
                 end
         endcase
     end
@@ -151,7 +169,7 @@ ModeToString #(datalen, modelen, errorlen) modestr(modeStr, errorStr, mode, err)
 
 //TUDO: No program lifetime
 initial begin
-    #17 $finish;
+    #37 $finish;    //Add 10 time units for every new test case
 end
 
 //Clock
@@ -168,7 +186,7 @@ initial begin
     #6 //Offset until just after posedge
     forever begin
     #10  $display(
-          "%b (%d) \t %b (%d) \t %b (%s) \t %b \t %b (%d) \t\t %b (%s)",
+          "%b (%d) \t %b (%d) \t %b (%s) \t %b \t %b (%d) \t %b (%s)",
           inA, inA, inB, inB, mode, modeStr, clear, out, out, err, errorStr
         );
     end
@@ -177,6 +195,8 @@ end
 //Test cases
 initial begin
     #4 //Offset until just before posedge
-    #10 inA = 8'b01010001; mode = 4'b0001; clear = 0;
+    #10 inA = 8'b01010001; inB = 8'b00011000; mode = `AND; clear = 0;
+    #10 inA = out; mode = 4'b000; clear = 0;
+    #10 inA = 8'b01010001; inB = 8'b00011000; mode = `OR; clear = 0;
 end
 endmodule
