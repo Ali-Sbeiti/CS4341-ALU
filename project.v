@@ -25,7 +25,42 @@
 `define OverflowError 2'b01
 `define UnderflowError 2'b10
 
+// -- ToString: Assigns Readable Name to Mode/Error Events
+module ModeToString(modeStr, errorStr, mode, err);
+    parameter datalen = 8;
+    parameter modelen = 4;
+    parameter errorlen = 2;
+
+    output reg[11*datalen:0] modeStr;
+    output reg[9*datalen:0] errorStr;
+
+    input [modelen-1:0] mode;
+    input [errorlen-1:0] err;
+
+    always @(*) begin
+        case(mode)
+            `NoChange: modeStr = "No Change";
+            `NOT: modeStr = "NOT";
+            `ShiftLeft: modeStr = "Shift Left";
+            `ShiftRight: modeStr = "Shift Right";
+            `Load: modeStr = "Load";
+            `AND: modeStr = "AND";
+            `OR: modeStr = "OR";
+            `XOR: modeStr = "XOR";
+            `Add: modeStr = "Add";
+            `Subtract: modeStr = "Subtract";
+        endcase
+
+        case(err)
+            `NoError: errorStr = "No Error";
+            `OverflowError: errorStr = "Overflow";
+            `UnderflowError: errorStr = "Underflow";
+        endcase
+    end
+endmodule
+
 // -- Rising Edge, D Flip Flop Register
+//Modified module to produce a register of flops, instance this to create new registers of size datalen
 module DFF(q, clk, d, reset);
     //Default register size
     parameter datalen = 8;
@@ -61,14 +96,22 @@ module ALU(out, error, inA, inB, mode, clear,clk);
     input clear; 
     input clk;
     //Wire
-    wire [datalen-1:0] store;
+    //wire [datalen-1:0] store; TUDO: Connect wire imbed DFF accumulator?
     reg [datalen-1:0] str;
-    //N-bit register module
-    DFF #(datalen) acu(out, clk, str, clear);
+    //N-bit accumulator register
+    DFF #(datalen) accumulator(out, clk, str, clear);
 
     //Op selection
     always @(*) begin
         case(mode)
+            `NoChange:
+                begin
+                    str = out;
+                end
+            `Load:
+                begin
+                    str = inA;
+                end
             `NOT:
                 begin
                     str = ~inA;
@@ -97,9 +140,14 @@ reg [datalen-1:0] inA;
 reg [datalen-1:0] inB;
 reg [modelen-1:0] mode;
 reg clear;
+//Mode/Error ToString
+wire [11*datalen:0] modeStr;
+wire [9*datalen:0] errorStr;
 
 //ALU module
 ALU #(datalen, modelen, errorlen) alu(out,err, inA, inB, mode, clear,clk);
+//To String module
+ModeToString #(datalen, modelen, errorlen) modestr(modeStr, errorStr, mode, err);
 
 //TUDO: No program lifetime
 initial begin
@@ -116,9 +164,13 @@ end
 
 //$display 
 initial begin
+    $display("Input A \t Input B \t\t Mode \t\t\t Clear \t Result \t\t Error");
     #6 //Offset until just after posedge
     forever begin
-        #10 $display("%b --> %b", inA, out);
+    #10  $display(
+          "%b (%d) \t %b (%d) \t %b (%s) \t %b \t %b (%d) \t\t %b (%s)",
+          inA, inA, inB, inB, mode, modeStr, clear, out, out, err, errorStr
+        );
     end
 end
 

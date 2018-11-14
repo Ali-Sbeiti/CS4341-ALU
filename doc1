@@ -1,2 +1,0 @@
-{n{1'b0}} ---> Create a binary string of size n, populated with 0's
-{string[3:0],in} ---> Concatenate 4 bit string with the new bit represented by in
