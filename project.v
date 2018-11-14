@@ -134,6 +134,12 @@ module ALU(out, error, inA, inB, mode, clear,clk);
                     str = inA ^ inB;
                     error = `NoError;
                 end
+            /*
+            `AND:
+                begin
+                    full_adder(str,error,inA,inB,op);
+                end
+            */
             //TUDO: As of right now, these two shift the value of the last result, subject to change
             `ShiftLeft:
                 begin
