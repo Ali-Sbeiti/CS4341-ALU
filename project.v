@@ -98,7 +98,7 @@ module ALU(out, error, inA, inB, mode, clear,clk);
     //Wire
     //wire [datalen-1:0] store; TUDO: Connect wire imbed DFF accumulator?
     reg [datalen-1:0] str;
-    reg n;
+    reg [datalen-1:0] n; //Counter
     //N-bit accumulator register
     DFF #(datalen) accumulator(out, clk, str, clear);
 
@@ -117,11 +117,8 @@ module ALU(out, error, inA, inB, mode, clear,clk);
                 end
             `NOT:
                 begin
-                    for(n=0; n < datalen; n=n+1) begin
-                        $display("%d",n);
-                    end
-                    //str = ~inA;
-                    //error = `NoError;
+                    str = ~inA;
+                    error = `NoError;
                 end
             `AND:
                 begin
