@@ -41,7 +41,7 @@ module ModeToString(modeStr, errorStr, mode, err);
 
     always @(*) begin
         case(mode)
-            `NoChange: modeStr = "No Change";
+            `NoChange: modeStr = "No Op";
             `NOT: modeStr = "NOT";
             `ShiftLeft: modeStr = "Shift Left";
             `ShiftRight: modeStr = "Shift Right";
@@ -82,7 +82,7 @@ module DFF(q, clk, d, reset);
 endmodule
 
 // -- ALU
-module ALU(out, error, inA, inB, mode, clear,clk);
+module ALU(out, error, lastA, inB, mode, clear,clk);
     //Default register lengths
     parameter datalen = 8;
     parameter modelen = 4;
@@ -92,7 +92,7 @@ module ALU(out, error, inA, inB, mode, clear,clk);
     output [datalen-1:0] out;
     output reg[errorlen-1:0] error;
     //Inputs
-    input [datalen-1:0] inA;
+    input [datalen-1:0] lastA;
     input [datalen-1:0] inB;
     input [modelen-1:0] mode;
     input clear; 
@@ -100,7 +100,7 @@ module ALU(out, error, inA, inB, mode, clear,clk);
     //Wire
     //wire [datalen-1:0] store; TUDO: Connect wire imbed DFF accumulator?
     reg [datalen-1:0] str;
-    reg [datalen-1:0] n; //Counter
+    reg [datalen-1:0] inA;
     //Adder
     wire [datalen-1:0] addOut;
     reg carry_in;
@@ -113,6 +113,8 @@ module ALU(out, error, inA, inB, mode, clear,clk);
 
     //Op selection
     always @(*) begin
+        inA = clear ? lastA : out;
+        //$display("Input A( Clear: %b): %d", clear, inA);
         case(mode)
             `NoChange:
                 begin
@@ -222,7 +224,9 @@ end
 //Test cases
 initial begin
     #4 //Offset until just before posedge
-    #10 inA = 8'b01010001; inB = 8'b00011000; mode = `Add; clear = 0;
+    #10 mode = `Load; inA = 20; inB = 10; clear = 1;
+    #10 mode = `Add; clear = 0;
+    #10 inB = 5;
     #10 inA = 10; mode = 4'b000; clear = 0;
     #10 inA = 8'b01010101; inB = 8'b01011000; mode = `OR; clear = 0;
     #10 mode = `ShiftLeft;

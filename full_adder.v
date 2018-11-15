@@ -48,7 +48,8 @@ endmodule
 
 
 
-/*/ -------------------- Test Bench -------------------- //
+/*
+/ -------------------- Test Bench -------------------- //
 module TestBench();
 parameter datalen = 8;
 //Inputs
