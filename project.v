@@ -113,8 +113,7 @@ module ALU(out, error, lastA, inB, mode, clear,clk);
 
     //Op selection
     always @(*) begin
-        inA = clear ? lastA : out;
-        //$display("Input A( Clear: %b): %d", clear, inA);
+        inA = mode === `Load ? lastA : out;
         case(mode)
             `NoChange:
                 begin
@@ -124,7 +123,7 @@ module ALU(out, error, lastA, inB, mode, clear,clk);
                 end
             `Load:
                 begin
-                    str = inA;
+                    str = lastA;
                     error = `NoError;
                 end
             `NOT:
@@ -224,7 +223,7 @@ end
 //Test cases
 initial begin
     #4 //Offset until just before posedge
-    #10 mode = `Load; inA = 20; inB = 10; clear = 1;
+    #10 mode = `Load; inA = 20; inB = 10; clear = 0;
     #10 mode = `Add; clear = 0;
     #10 inB = 5;
     #10 inA = 10; mode = 4'b000; clear = 0;
