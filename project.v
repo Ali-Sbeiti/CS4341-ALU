@@ -186,6 +186,7 @@ reg [datalen-1:0] inA;
 reg [datalen-1:0] inB;
 reg [modelen-1:0] mode;
 reg clear;
+reg [datalen-1:0] accumulate;
 //Mode/Error ToString
 wire [11*datalen:0] modeStr;
 wire [9*datalen:0] errorStr;
@@ -197,7 +198,7 @@ ModeToString #(datalen, modelen, errorlen) modestr(modeStr, errorStr, mode, err)
 
 //TUDO: No program lifetime
 initial begin
-    #57 $finish;    //Add 10 time units for every new test case
+    #77 $finish;    //Add 10 time units for every new test case
 end
 
 //Clock
@@ -210,13 +211,21 @@ end
 
 //$display 
 initial begin
-    $display("Input A \t Input B \t\t Mode \t\t\t Clear \t Result \t\t Error");
+    $display("Accumulator \t Input A \t\t Input B \t\t Mode \t\t\t Clear \t Result \t\t Error");
     #6 //Offset until just after posedge
     forever begin
     #10  $display(
-          "%b (%d) \t %b (%d) \t %b (%s) \t %b \t %b (%d) \t %b (%s)",
-          inA, inA, inB, inB, mode, modeStr, clear, out, out, err, errorStr
+          "%b (%d) \t %b (%d) \t %b (%d) \t %b (%s) \t %b \t %b (%d) \t %b (%s)",
+          accumulate, accumulate, inA, inA, inB, inB, mode, modeStr, clear, out, out, err, errorStr
         );
+    end
+end
+
+//Last Accumulate
+initial begin
+    #4 //Offset
+    forever begin
+        #10 accumulate = out;
     end
 end
 
