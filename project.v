@@ -107,6 +107,7 @@ module ALU(out, error, inA, inB, mode, clear,clk);
         case(mode)
             `NoChange:
                 begin
+                    //DFF output is fed back into DFF input
                     str = out;
                     error = `NoError;
                 end
