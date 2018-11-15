@@ -48,7 +48,7 @@ endmodule
 
 
 
-// -------------------- Test Bench -------------------- //
+/*/ -------------------- Test Bench -------------------- //
 module TestBench();
 parameter datalen = 8;
 //Inputs
@@ -62,9 +62,10 @@ wire carry;
 nAdder #(8) nAdd(out, carry, a, b, cin);
 
 initial begin
-    a=8'b00000111; b=8'b00000110; cin=0;
+    a=8'b10000111; b=8'b10000110; cin=0;
     #1 $display("%b + %b (%b) = %b {%b}", a,b,cin,out,carry);
 
 end
 
 endmodule
+//*/

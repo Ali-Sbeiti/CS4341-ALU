@@ -24,6 +24,8 @@
 `define NoError 2'b00
 `define OverflowError 2'b01
 `define UnderflowError 2'b10
+//Import Adder
+`include "./full_adder.v"
 
 // -- ToString: Assigns Readable Name to Mode/Error Events
 module ModeToString(modeStr, errorStr, mode, err);
@@ -99,8 +101,15 @@ module ALU(out, error, inA, inB, mode, clear,clk);
     //wire [datalen-1:0] store; TUDO: Connect wire imbed DFF accumulator?
     reg [datalen-1:0] str;
     reg [datalen-1:0] n; //Counter
+    //Adder
+    wire [datalen-1:0] addOut;
+    reg carry_in;
+    wire carry_out;
+
     //N-bit accumulator register
     DFF #(datalen) accumulator(out, clk, str, clear);
+    //8-Bit Adder module
+    nAdder #(8) nAdd(addOut, carry_out, inA, inB, carry_in);
 
     //Op selection
     always @(*) begin
@@ -136,12 +145,13 @@ module ALU(out, error, inA, inB, mode, clear,clk);
                     str = inA ^ inB;
                     error = `NoError;
                 end
-            /*
-            `AND:
+            `Add:
                 begin
-                    full_adder(str,error,inA,inB,op);
+                    carry_in = 1'b0;
+                    str = addOut;
+                    error = carry_out ? `OverflowError : `NoError;
                 end
-            */
+
             //TUDO: As of right now, these two shift the value of the last result, subject to change
             `ShiftLeft:
                 begin
@@ -212,8 +222,8 @@ end
 //Test cases
 initial begin
     #4 //Offset until just before posedge
-    #10 inA = 8'b01010001; inB = 8'b00011000; mode = `NOT; clear = 0;
-    #10 inA = out; mode = 4'b000; clear = 0;
+    #10 inA = 8'b01010001; inB = 8'b00011000; mode = `Add; clear = 0;
+    #10 inA = 10; mode = 4'b000; clear = 0;
     #10 inA = 8'b01010101; inB = 8'b01011000; mode = `OR; clear = 0;
     #10 mode = `ShiftLeft;
     #10 mode = `ShiftRight;
